@@ -1,0 +1,1604 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>منصة المدرسة الإلكترونية الشاملة</title>
+  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <style>
+    :root {
+      --bg-color: #f4f7fe;
+      --card-bg: #ffffff;
+      --text-color: #2b3674;
+      --card-shadow: 0 10px 30px rgba(0,0,0,0.05);
+      --primary-color: #4318FF;
+    }
+
+    body.dark-mode {
+      --bg-color: #0b1437;
+      --card-bg: #111c44;
+      --text-color: #ffffff;
+      --card-shadow: 0 10px 30px rgba(0,0,0,0.4);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Tajawal', sans-serif; }
+    body { background-color: var(--bg-color); color: var(--text-color); padding-bottom: 40px; transition: 0.3s; }
+
+    .login-overlay {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: linear-gradient(135deg, #11047A 0%, #4318FF 100%);
+      display: flex; justify-content: center; align-items: center; z-index: 2000;
+      padding: 15px;
+    }
+    .login-box {
+      background: var(--card-bg); width: 100%; max-width: 420px;
+      padding: 30px 25px; border-radius: 24px; box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+      text-align: center;
+    }
+    .login-box h2 { font-size: 1.5rem; font-weight: 800; color: #4318FF; margin-bottom: 8px; }
+    .login-box p { font-size: 0.85rem; color: #7090B0; margin-bottom: 20px; }
+
+    .top-header {
+      background: linear-gradient(135deg, #4318FF 0%, #11047A 100%);
+      color: white; padding: 25px 20px;
+      border-bottom-left-radius: 25px; border-bottom-right-radius: 25px;
+      box-shadow: 0 5px 20px rgba(67, 24, 255, 0.3);
+      position: relative;
+    }
+    .school-title { text-align: center; font-size: 1.6rem; font-weight: 800; margin-bottom: 12px; }
+    .user-badge { text-align: center; font-size: 0.9rem; background: rgba(255,255,255,0.2); display: inline-block; padding: 4px 15px; border-radius: 20px; margin-top: 5px; }
+    
+    .info-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; text-align: center; margin-top: 15px; }
+    .info-item { background: rgba(255, 255, 255, 0.12); padding: 8px; border-radius: 12px; backdrop-filter: blur(5px); }
+    .info-item .label { font-size: 0.75rem; opacity: 0.8; display: block; }
+    .info-item .val { font-size: 0.95rem; font-weight: 700; }
+
+    .header-btns { position: absolute; top: 15px; left: 15px; display: flex; gap: 8px; }
+    .btn-header { background: rgba(255,255,255,0.2); border: none; color: white; padding: 6px 12px; border-radius: 15px; cursor: pointer; font-size: 0.8rem; font-weight: bold; }
+
+    .container { max-width: 1300px; margin: 25px auto; padding: 0 15px; }
+    .section-title { font-size: 1.3rem; font-weight: 800; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; }
+    .modules-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 18px; }
+
+    .color-box {
+      border-radius: 20px; padding: 22px; color: white;
+      box-shadow: var(--card-shadow); display: flex; flex-direction: column;
+      justify-content: space-between; min-height: 130px; cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    .color-box:hover { transform: translateY(-6px); }
+    .color-box h3 { font-size: 1.15rem; font-weight: 700; display: flex; align-items: center; gap: 8px; }
+    .color-box p { font-size: 0.8rem; opacity: 0.85; margin-top: 6px; }
+
+    .box-teachers { background: linear-gradient(135deg, #FF5E7E, #FF9966); }
+    .box-students { background: linear-gradient(135deg, #00C6FF, #0072FF); }
+    .box-grades { background: linear-gradient(135deg, #7F00FF, #E100FF); }
+    .box-settings { background: linear-gradient(135deg, #30336b, #130f40); }
+
+    .view-section { display: none; margin-top: 20px; background: var(--card-bg); padding: 25px; border-radius: 20px; box-shadow: var(--card-shadow); }
+    .back-btn { background: #6c757d; color: white; padding: 8px 16px; border-radius: 10px; border: none; cursor: pointer; font-weight: bold; }
+
+    .controls-bar { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 20px; align-items: center; }
+    .btn-action { padding: 9px 16px; border-radius: 10px; border: none; font-weight: bold; cursor: pointer; color: white; display: inline-flex; align-items: center; gap: 6px; font-size: 0.88rem; transition: 0.2s; }
+    .btn-action:hover { opacity: 0.9; transform: scale(1.02); }
+    .btn-green { background-color: #05cd99; }
+    .btn-blue { background-color: #4318FF; }
+    .btn-purple { background-color: #8e44ad; }
+    .btn-red { background-color: #EE5D50; }
+    
+    select, input, textarea { padding: 9px 14px; border-radius: 10px; border: 1px solid #e0e5f2; font-family: inherit; background: var(--card-bg); color: var(--text-color); width: 100%; margin-bottom: 10px; }
+
+    .table-container { 
+      overflow-x: auto; 
+      max-height: 600px; 
+      border-radius: 14px; 
+      border: 1px solid #e0e5f2;
+      box-shadow: inset 0 0 10px rgba(0,0,0,0.02);
+    }
+    table { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 0.88rem; }
+    th, td { border-bottom: 1px solid #e2e8f0; border-left: 1px solid #e2e8f0; padding: 10px; text-align: center; white-space: nowrap; }
+    th:last-child, td:last-child { border-left: none; }
+    
+    th { 
+      background: #4318FF; 
+      color: white; 
+      position: sticky; 
+      top: 0; 
+      z-index: 2; 
+      font-weight: 700;
+      font-size: 0.88rem;
+    }
+
+    tbody tr:nth-child(even) { background-color: rgba(67, 24, 255, 0.02); }
+    tbody tr:hover { background-color: rgba(67, 24, 255, 0.05); }
+
+    .grade-input {
+      width: 80px; text-align: center; border-radius: 8px;
+      border: 1.5px solid #dcdfe6; padding: 6px; margin-bottom: 0;
+      font-weight: 700; font-size: 0.95rem; transition: all 0.2s ease; background: #fff;
+    }
+    .grade-input:disabled {
+      background-color: #e9ecef !important;
+      cursor: not-allowed;
+      border-color: #ced4da !important;
+      color: #6c757d !important;
+    }
+    body.dark-mode .grade-input { background: #0b1437; border-color: #2b3674; color: #fff; }
+    body.dark-mode .grade-input:disabled { background: #1b254b !important; color: #52608d !important; }
+    .grade-input:focus { border-color: #4318FF; outline: none; box-shadow: 0 0 0 3px rgba(67, 24, 255, 0.15); }
+    .grade-input.midterm-input { border-color: #7F00FF; background-color: #fcf8ff; }
+    body.dark-mode .grade-input.midterm-input { background-color: #1a0b36; }
+
+    .annual-badge {
+      font-size: 0.85rem; font-weight: 800; padding: 4px 10px;
+      border-radius: 8px; display: inline-block; min-width: 48px;
+    }
+    .badge-pass { background: #e6fffa; color: #047857; border: 1px solid #b2f5ea; }
+    .badge-fail { background: #fff5f5; color: #e53e3e; border: 1px solid #fed7d7; }
+
+    .card-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 15px; }
+    .item-card { background: var(--card-bg); border: 1px solid #e2e8f0; border-radius: 15px; padding: 18px; box-shadow: var(--card-shadow); }
+
+    .teacher-info-list { list-style: none; margin: 10px 0; font-size: 0.9rem; }
+    .teacher-info-list li { margin-bottom: 8px; display: flex; justify-content: space-between; border-bottom: 1px dashed #edf2f7; padding-bottom: 5px; flex-wrap: wrap; gap: 5px; }
+    .hall-tag { background: #e0e7ff; color: #4318FF; padding: 2px 8px; border-radius: 6px; font-size: 0.8rem; font-weight: bold; margin-left: 4px; display: inline-block; margin-bottom: 2px; }
+    .code-badge { background: #fff3bf; color: #d9480f; padding: 3px 8px; border-radius: 6px; font-weight: bold; font-family: monospace; font-size: 0.9rem; border: 1px dashed #fcc419; }
+
+    .settings-group { margin-bottom: 15px; display: flex; flex-direction: column; gap: 6px; max-width: 450px; }
+    .settings-group label { font-weight: bold; font-size: 0.9rem; }
+    
+    .student-item { background: rgba(0,0,0,0.02); border: 1px solid #edf2f7; border-radius: 8px; padding: 8px; margin-bottom: 8px; }
+
+    .stats-bar-box {
+      display: flex; gap: 15px; background: rgba(67, 24, 255, 0.05); padding: 12px 20px;
+      border-radius: 12px; margin-bottom: 15px; border: 1px solid rgba(67, 24, 255, 0.1);
+      flex-wrap: wrap; justify-content: space-around; font-weight: bold; font-size: 0.9rem;
+    }
+
+    .lock-box-container {
+      background: rgba(238, 93, 80, 0.05);
+      border: 1px solid rgba(238, 93, 80, 0.2);
+      border-radius: 14px;
+      padding: 15px;
+      margin-top: 15px;
+    }
+    .lock-option {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 0;
+      border-bottom: 1px dashed rgba(0,0,0,0.08);
+    }
+    .lock-option:last-child { border-bottom: none; }
+
+    .switch {
+      position: relative; display: inline-block; width: 46px; height: 24px;
+    }
+    .switch input { opacity: 0; width: 0; height: 0; }
+    .slider {
+      position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0;
+      background-color: #ccc; transition: .3s; border-radius: 24px;
+    }
+    .slider:before {
+      position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px;
+      background-color: white; transition: .3s; border-radius: 50%;
+    }
+    input:checked + .slider { background-color: #EE5D50; }
+    input:checked + .slider:before { transform: translateX(22px); }
+
+    .modal-overlay {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0, 0, 0, 0.5); backdrop-filter: blur(4px);
+      display: none; justify-content: center; align-items: center; z-index: 1000;
+    }
+    .modal-card {
+      background: var(--card-bg); width: 90%; max-width: 520px;
+      border-radius: 20px; padding: 25px; box-shadow: var(--card-shadow);
+      animation: modalFade 0.3s ease-out; max-height: 90vh; overflow-y: auto;
+    }
+    @keyframes modalFade { from { transform: translateY(-20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+    .modal-header { font-size: 1.2rem; font-weight: 800; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #eee; padding-bottom: 10px; }
+    .checkbox-group { display: flex; flex-wrap: wrap; gap: 10px; max-height: 140px; overflow-y: auto; padding: 10px; border: 1px solid #e0e5f2; border-radius: 10px; margin-bottom: 15px; }
+    .checkbox-item { display: flex; align-items: center; gap: 6px; font-size: 0.85rem; background: rgba(0,0,0,0.03); padding: 5px 10px; border-radius: 8px; cursor: pointer; }
+    .checkbox-item input { width: auto; margin-bottom: 0; cursor: pointer; }
+
+    .teacher-top-nav {
+      background: var(--card-bg);
+      border-radius: 16px;
+      padding: 14px 20px;
+      box-shadow: var(--card-shadow);
+      margin-bottom: 20px;
+      border: 1px solid #e0e5f2;
+      display: none;
+    }
+
+    .nav-header {
+      margin-bottom: 10px;
+      padding-bottom: 6px;
+      border-bottom: 1px solid rgba(0,0,0,0.05);
+    }
+
+    .nav-title {
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: var(--text-color);
+    }
+
+    .nav-links-container {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .teacher-nav-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 16px;
+      background: rgba(67, 24, 255, 0.08);
+      color: #4318FF;
+      border-radius: 10px;
+      text-decoration: none;
+      font-size: 0.88rem;
+      font-weight: 700;
+      transition: all 0.2s ease;
+    }
+
+    .teacher-nav-btn:hover, .teacher-nav-btn.active {
+      background: #4318FF;
+      color: #ffffff;
+    }
+
+    @media print {
+      body * { visibility: hidden; }
+      .printable-pdf, .printable-pdf * { visibility: visible; }
+      .printable-pdf { position: absolute; left: 0; top: 0; width: 100%; }
+      .controls-bar, .top-header, .login-overlay, .back-btn, .header-btns, .teacher-top-nav { display: none !important; }
+      .grade-input { border: none !important; background: transparent !important; text-align: center; }
+      th { background-color: #4318FF !important; color: white !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- شاشة تسجيل الدخول -->
+  <div class="login-overlay" id="login-screen">
+    <div class="login-box">
+      <h2 id="login-school-title">🏫 المنصة المدرسية</h2>
+      <p>يرجى إدخال كود الدخول الخاص بك للدخول إلى المنصة</p>
+
+      <label style="font-size:0.85rem; font-weight:bold; display:block; text-align:right; margin-bottom:5px;">كود / رمز الدخول:</label>
+      <input type="password" id="login-pass-input" placeholder="أدخل كود المدرس أو رمز المدير..." style="text-align:center; font-size:1.1rem; letter-spacing:2px;" onkeypress="if(event.key === 'Enter') handleLogin()">
+
+      <button class="btn-action btn-blue" style="width:100%; justify-content:center; padding:12px; margin-top:10px;" onclick="handleLogin()">🔓 تسجيل الدخول</button>
+    </div>
+  </div>
+
+  <header class="top-header">
+    <div class="header-btns">
+      <button class="btn-header" onclick="toggleTheme()">🌙 الوضع</button>
+      <button class="btn-header" style="background:rgba(238,93,80,0.3);" onclick="logout()">🚪 خروج</button>
+    </div>
+    <div class="school-title" id="header-school">🏫 المنصة المدرسية الإلكترونية</div>
+    <div style="text-align: center;">
+      <span class="user-badge" id="current-user-badge">🔑 مدير النظام</span>
+    </div>
+    <div class="info-grid" id="stats-header">
+      <div class="info-item"><span class="label">إجمالي الكادر التدريسي</span><span class="val" id="count-teachers">0</span></div>
+      <div class="info-item"><span class="label">إجمالي القاعات الدراسية</span><span class="val" id="count-halls">0</span></div>
+      <div class="info-item"><span class="label">إجمالي الطلاب</span><span class="val" id="count-students">0</span></div>
+      <div class="info-item"><span class="label">التاريخ</span><span class="val" id="current-date">--/--/----</span></div>
+    </div>
+  </header>
+
+  <main class="container">
+
+    <!-- شريط تنقل السريع للمدرس -->
+    <div class="teacher-top-nav" id="teacher-nav-bar">
+      <div class="nav-header">
+        <span class="nav-title">⚙️ أدوات المدرس والوصول السريع</span>
+      </div>
+      <div class="nav-links-container">
+        <a href="#" class="teacher-nav-btn active" onclick="event.preventDefault(); openView('grades-view');">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+            <path d="M8 7h8M8 11h8"></path>
+          </svg>
+          <span>سجل الدرجات الإلكتروني</span>
+        </a>
+      </div>
+    </div>
+
+    <!-- 1. نافذة إضافة / تعديل المدرس -->
+    <div class="modal-overlay" id="teacher-modal">
+      <div class="modal-card">
+        <div class="modal-header">
+          <span id="modal-title">👨‍🏫 إضافة مدرس جديد</span>
+          <button style="border:none; background:none; font-size:1.2rem; cursor:pointer;" onclick="closeTeacherModal()">❌</button>
+        </div>
+        
+        <label style="font-size:0.85rem; font-weight:bold;">الاسم الثلاثي للمدرس:</label>
+        <input type="text" id="modal-teacher-name" placeholder="مثال: أ. أحمد فاضل علي">
+
+        <label style="font-size:0.85rem; font-weight:bold;">التخصص / المادة الدراسية:</label>
+        <input type="text" id="modal-teacher-subject" placeholder="مثال: الكيمياء">
+
+        <label style="font-size:0.85rem; font-weight:bold;">كود دخول المدرس للمنصة (توليد تلقائي):</label>
+        <input type="text" id="modal-teacher-code" placeholder="مثال: T-9842" style="font-weight:bold; color:#4318FF;">
+
+        <label style="font-size:0.85rem; font-weight:bold;">عدد الحصص الأسبوعية:</label>
+        <input type="number" id="modal-teacher-lessons" value="10" placeholder="10">
+
+        <label style="font-size:0.85rem; font-weight:bold;">حدد القاعات المرتبطة بالمدرس (يمكن اختيار أكثر من قاعة):</label>
+        <div class="checkbox-group" id="modal-halls-list"></div>
+
+        <div style="display:flex; gap:10px; margin-top:10px;">
+          <button class="btn-action btn-green" style="flex:1; justify-content:center;" onclick="saveTeacherData()">💾 حفظ بيانات المدرس</button>
+          <button class="btn-action btn-red" style="padding:8px 15px;" onclick="closeTeacherModal()">إلغاء</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2. نافذة إضافة طالب جديد -->
+    <div class="modal-overlay" id="student-modal">
+      <div class="modal-card">
+        <div class="modal-header">
+          <span>👤 إضافة طالب جديد</span>
+          <button style="border:none; background:none; font-size:1.2rem; cursor:pointer;" onclick="closeStudentModal()">❌</button>
+        </div>
+
+        <label style="font-size:0.85rem; font-weight:bold;">الاسم الثلاثي للطالب:</label>
+        <input type="text" id="student-fullname" placeholder="مثال: محمد علي حسن">
+
+        <label style="font-size:0.85rem; font-weight:bold;">اختر القاعة الدراسية:</label>
+        <select id="student-hall-select"></select>
+
+        <label style="font-size:0.85rem; font-weight:bold;">رقم هاتف ولي الأمر (اختياري):</label>
+        <input type="text" id="student-phone" placeholder="07xxxxxxxx">
+
+        <div style="display:flex; gap:10px; margin-top:10px;">
+          <button class="btn-action btn-green" style="flex:1; justify-content:center;" onclick="saveStudentData()">💾 إضافة الطالب الآن</button>
+          <button class="btn-action btn-red" style="padding:8px 15px;" onclick="closeStudentModal()">إلغاء</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3. نافذة تخصيص المدرسين للقاعة -->
+    <div class="modal-overlay" id="hall-teachers-modal">
+      <div class="modal-card">
+        <div class="modal-header">
+          <span id="hall-teachers-title">👨‍🏫 اختيار مدرسين للقاعة</span>
+          <button style="border:none; background:none; font-size:1.2rem; cursor:pointer;" onclick="closeHallTeachersModal()">❌</button>
+        </div>
+        <p style="font-size:0.85rem; color:#666; margin-bottom:12px;">حدد المدرسين الذين يقدمون المحاضرات داخل هذه القاعة:</p>
+        
+        <div class="checkbox-group" id="hall-teachers-list"></div>
+
+        <div style="display:flex; gap:10px; margin-top:10px;">
+          <button class="btn-action btn-blue" style="flex:1; justify-content:center;" onclick="saveHallTeachers()">💾 حفظ المدرسين المحددين</button>
+          <button class="btn-action btn-red" style="padding:8px 15px;" onclick="closeHallTeachersModal()">إلغاء</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 4. نافذة بطاقة درجات الطالب الفردية -->
+    <div class="modal-overlay" id="student-report-card-modal">
+      <div class="modal-card printable-pdf" style="max-width: 600px;">
+        <div class="modal-header" style="border-bottom: 2px solid #4318FF;">
+          <span id="report-card-school-title" style="color: #4318FF; font-weight:800;">🎓 بطاقة درجات الطالب</span>
+          <button class="back-btn" style="padding: 2px 8px;" onclick="closeReportCardModal()">❌</button>
+        </div>
+        
+        <div id="student-card-content" style="padding: 10px 0;"></div>
+
+        <div style="display:flex; gap:10px; margin-top:15px;" class="controls-bar">
+          <button class="btn-action btn-purple" style="flex:1; justify-content:center;" onclick="window.print()">🖨️ طباعة بطاقة الطالب</button>
+          <button class="btn-action btn-red" style="padding:8px 15px;" onclick="closeReportCardModal()">إغلاق</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 5. نافذة طباعة أكواد الكادر -->
+    <div class="modal-overlay" id="teacher-codes-modal">
+      <div class="modal-card printable-pdf" style="max-width: 700px;">
+        <div class="modal-header">
+          <span>🔑 دليل أكواد دخول الكادر التدريسي</span>
+          <button class="back-btn" style="padding: 2px 8px;" onclick="closeTeacherCodesModal()">❌</button>
+        </div>
+
+        <div id="teacher-codes-print-area">
+          <table style="width:100%; border-collapse: collapse; margin-top: 10px;">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>اسم المدرس</th>
+                <th>المادة / التخصص</th>
+                <th>كود الدخول للمنصة</th>
+              </tr>
+            </thead>
+            <tbody id="teacher-codes-tbody"></tbody>
+          </table>
+        </div>
+
+        <div style="display:flex; gap:10px; margin-top:15px;" class="controls-bar">
+          <button class="btn-action btn-purple" style="flex:1; justify-content:center;" onclick="window.print()">🖨️ طباعة الأكواد</button>
+          <button class="btn-action btn-red" style="padding:8px 15px;" onclick="closeTeacherCodesModal()">إغلاق</button>
+        </div>
+      </div>
+    </div>
+    
+    <!-- القائمة الرئيسية للمدير -->
+    <div id="main-view">
+      <h2 class="section-title">لوحة التحكم المركزية للمدرسة</h2>
+      <div class="modules-grid">
+        <div class="color-box box-teachers" onclick="openView('teachers-view')">
+          <div><h3><span>👨‍🏫</span> إدارة المدرسين والأكواد</h3><p>إضافة الكادر وتوليد أكواد الدخول والحصص والقاعات</p></div>
+        </div>
+        <div class="color-box box-students" onclick="openView('students-view')">
+          <div><h3><span>🏛️</span> إدارة الطلاب والقاعات</h3><p>إضافة الأسماء الثلاثية والمدرسين لكل قاعة</p></div>
+        </div>
+        <div class="color-box box-grades" onclick="openView('grades-view')">
+          <div><h3><span>📊</span> سجل الدرجات الشامل (PDF / Excel)</h3><p>رصد الدرجات وتصدير السجل بشكل كامل</p></div>
+        </div>
+        <div class="color-box box-settings" onclick="openView('settings-view')">
+          <div><h3><span>⚙️</span> إعدادات المنصة والنسخ الاحتياطي والقفل</h3><p>تغيير الرمز، التحكم بقفل إدخال الدرجات والنسخ الاحتياطي</p></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 1. إدارة المدرسين الشاملة -->
+    <div id="teachers-view" class="view-section">
+      <div class="section-title">
+        <span>👨‍🏫 دليل الكادر التدريسي الشامل والأكواد</span>
+        <button class="back-btn" onclick="closeView('teachers-view')">رجوع ↩</button>
+      </div>
+      <div class="controls-bar">
+        <button class="btn-action btn-blue" onclick="openAddTeacherModal()">➕ إضافة مدرس جديد وتوليد كود دخول</button>
+        <button class="btn-action btn-purple" onclick="openTeacherCodesPrintModal()">🔑 طباعة قائمة أكواد الكادر</button>
+      </div>
+      <div class="card-grid" id="teachers-container"></div>
+    </div>
+
+    <!-- 2. إدارة القاعات المربوطة بالطلاب والمدرسين -->
+    <div id="students-view" class="view-section">
+      <div class="section-title">
+        <span>🏛️ إدارة القاعات والطلاب</span>
+        <button class="back-btn" onclick="closeView('students-view')">رجوع ↩</button>
+      </div>
+      <div class="controls-bar">
+        <button class="btn-action btn-blue" onclick="addCustomHall()">➕ إضافة قاعة دراسية جديدة</button>
+        <button class="btn-action btn-green" onclick="openAddStudentModal()">👤 إضافة طالب جديد</button>
+      </div>
+      <div class="card-grid" id="halls-container"></div>
+    </div>
+
+    <!-- 3. سجل الدرجات الشامل -->
+    <div id="grades-view" class="view-section">
+      <div class="section-title">
+        <span id="grades-title-text">📊 سجل الدرجات التفاعلي والربط المباشر</span>
+        <button class="back-btn" id="grades-back-btn" onclick="closeView('grades-view')">رجوع ↩</button>
+      </div>
+
+      <div style="font-size:0.8rem; color:#666; margin-bottom:10px; background:rgba(67,24,255,0.05); padding:8px 12px; border-radius:8px;">
+        📌 <b>ملاحظة للرصد:</b> أدخل الدرجة من (0 - 100)، أو اكتب <b>(غ)</b> للغائب، أو <b>(م)</b> للمجاز. اضغط على زر <b>حفظ الدرجات</b> بعد الإدخال.
+      </div>
+
+      <div class="controls-bar">
+        <label style="width:auto; margin:0;">القاعة: </label>
+        <select id="grade-hall-select" style="width:auto; margin:0;" onchange="loadGradeTable()"></select>
+
+        <span id="admin-grade-controls" style="display:inline-flex; gap:10px; align-items:center;">
+          <label style="width:auto; margin:0;">نوع العرض: </label>
+          <select id="grade-view-type" style="width:auto; margin:0;" onchange="loadGradeTable()">
+            <option value="subject">سجل المدرس (عرض مادة واحدة)</option>
+            <option value="all_subjects">سجل القاعة الشامل (كافة المواد)</option>
+          </select>
+
+          <label id="subject-select-label" style="width:auto; margin:0;">المادة / المدرس: </label>
+          <select id="grade-subject-select" style="width:auto; margin:0;" onchange="loadGradeTable()"></select>
+        </span>
+
+        <input type="text" id="grade-search-input" placeholder="🔍 بحث عن اسم طالب..." style="width:180px; margin:0;" oninput="filterGradesTable()">
+
+        <!-- زر حفظ الدرجات الخاص بالمدرس/المدير -->
+        <button class="btn-action btn-blue" onclick="saveCurrentGradesToDB()">💾 حفظ الدرجات</button>
+        <button class="btn-action btn-green" onclick="exportGradesExcel()">📊 تصدير السجل إلى Excel</button>
+        <button class="btn-action btn-red" onclick="exportGradesPDF()">📄 تصدير / طباعة PDF مباشر</button>
+      </div>
+
+      <!-- شريط إحصائيات القاعة للمدير فقط -->
+      <div class="stats-bar-box" id="hall-stats-bar" style="display:none;">
+        <div>👥 إجمالي الطلاب: <span id="stat-total-students" style="color:#4318FF;">0</span></div>
+        <div>✅ نسبة النجاح: <span id="stat-pass-rate" style="color:#05cd99;">0%</span></div>
+        <div>❌ عدد الراسبين: <span id="stat-fail-count" style="color:#EE5D50;">0</span></div>
+      </div>
+
+      <div class="table-container printable-pdf" id="grades-pdf-area">
+        <div id="pdf-header" style="display:none; text-align:center; margin-bottom:15px; padding:10px; border-bottom:2px solid #4318FF;">
+          <h2 id="pdf-school-name" style="color:#4318FF;"></h2>
+          <h3 id="pdf-subject-title" style="color:#333; margin-top:5px;"></h3>
+        </div>
+        <table id="grades-table-element">
+          <thead id="grades-table-head"></thead>
+          <tbody id="grades-table-body"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- 4. إعدادات المنصة والنسخ الاحتياطي وقفل الدرجات -->
+    <div id="settings-view" class="view-section">
+      <div class="section-title">
+        <span>⚙️ إعدادات المنصة وقفل إدخال الدرجات</span>
+        <button class="back-btn" onclick="closeView('settings-view')">رجوع ↩</button>
+      </div>
+      
+      <div class="settings-group">
+        <label>اسم المدرسة / المنصة التعليمية:</label>
+        <input type="text" id="set-school-name" placeholder="أدخل اسم المدرسة">
+      </div>
+
+      <div class="settings-group">
+        <label>🔐 تغيير رمز دخول المدير الحالي:</label>
+        <input type="text" id="set-admin-pass" placeholder="أدخل رمز مدير جديد">
+      </div>
+
+      <!-- قسم التحكم بقفل إدخال الدرجات للمدرسين -->
+      <div class="lock-box-container">
+        <h4 style="color:#EE5D50; margin-bottom:8px;">🔒 التحكم بقفل إدخال الدرجات للمدرسين:</h4>
+        <p style="font-size:0.8rem; color:#666; margin-bottom:12px;">عند تفعيل القفل، لن يتمكن المدرسون من تعديل درجات هذه الفترة (تبقى ممتلئة ومتاحة للمدير فقط).</p>
+
+        <div class="lock-option">
+          <span>🔒 قفل درجات <b>معدل الفصل الأول</b>:</span>
+          <label class="switch">
+            <input type="checkbox" id="lock-term1" onchange="saveLockSettings()">
+            <span class="slider"></span>
+          </label>
+        </div>
+
+        <div class="lock-option">
+          <span>🔒 قفل درجات <b>نصف السنة</b>:</span>
+          <label class="switch">
+            <input type="checkbox" id="lock-midterm" onchange="saveLockSettings()">
+            <span class="slider"></span>
+          </label>
+        </div>
+
+        <div class="lock-option">
+          <span>🔒 قفل درجات <b>معدل الفصل الثاني</b>:</span>
+          <label class="switch">
+            <input type="checkbox" id="lock-term2" onchange="saveLockSettings()">
+            <span class="slider"></span>
+          </label>
+        </div>
+      </div>
+
+      <button class="btn-action btn-green" style="margin-top:15px;" onclick="saveSettings()">💾 حفظ الإعدادات العامة</button>
+
+      <hr style="margin: 20px 0; opacity: 0.2;">
+      <h3 style="margin-bottom:12px;">📁 إدارة النسخ الاحتياطي وحماية البيانات</h3>
+      <div class="controls-bar">
+        <button class="btn-action btn-blue" onclick="exportBackupJSON()">📥 تنزيل نسخة احتياطية (Backup JSON)</button>
+        <label class="btn-action btn-purple" style="cursor:pointer; margin:0;">
+          📤 استرجاع بيانات من ملف JSON
+          <input type="file" accept=".json" style="display:none" onchange="importBackupJSON(event)">
+        </label>
+      </div>
+
+      <hr style="margin: 20px 0; opacity: 0.2;">
+      <button class="btn-action btn-red" onclick="resetDatabase()">⚠️ إعادة ضبط وتفريغ جميع بيانات المدرسة</button>
+    </div>
+
+  </main>
+
+  <script>
+    let editingTeacherIndex = null;
+    let activeHallForTeachers = null;
+    let currentUser = null;
+
+    let schoolDB = JSON.parse(localStorage.getItem('school_master_db')) || {
+      settings: {
+        schoolName: "المنصة المدرسية الإلكترونية",
+        adminPass: "1987",
+        locks: { term1: false, midterm: false, term2: false }
+      },
+      teachers: [],
+      halls: {},
+      hallTeachersMap: {}
+    };
+
+    if (!schoolDB.settings) schoolDB.settings = {};
+    if (!schoolDB.settings.adminPass) schoolDB.settings.adminPass = "1987";
+    if (!schoolDB.settings.locks) {
+      schoolDB.settings.locks = { term1: false, midterm: false, term2: false };
+    }
+    if (!schoolDB.hallTeachersMap) schoolDB.hallTeachersMap = {};
+
+    function saveData() {
+      localStorage.setItem('school_master_db', JSON.stringify(schoolDB));
+      updateDashboardStats();
+    }
+
+    function updateDashboardStats() {
+      document.getElementById('header-school').textContent = "🏫 " + (schoolDB.settings.schoolName || "المدرسة الإلكترونية");
+      document.getElementById('login-school-title').textContent = "🏫 " + (schoolDB.settings.schoolName || "المنصة المدرسية");
+      document.getElementById('count-teachers').textContent = schoolDB.teachers.length;
+      document.getElementById('count-halls').textContent = Object.keys(schoolDB.halls).length;
+
+      let totalStudents = 0;
+      Object.values(schoolDB.halls).forEach(list => totalStudents += list.length);
+      document.getElementById('count-students').textContent = totalStudents;
+
+      document.getElementById('set-school-name').value = schoolDB.settings.schoolName || "";
+      document.getElementById('set-admin-pass').value = schoolDB.settings.adminPass || "1987";
+
+      let locks = schoolDB.settings.locks || { term1: false, midterm: false, term2: false };
+      document.getElementById('lock-term1').checked = !!locks.term1;
+      document.getElementById('lock-midterm').checked = !!locks.midterm;
+      document.getElementById('lock-term2').checked = !!locks.term2;
+    }
+
+    function saveLockSettings() {
+      schoolDB.settings.locks = {
+        term1: document.getElementById('lock-term1').checked,
+        midterm: document.getElementById('lock-midterm').checked,
+        term2: document.getElementById('lock-term2').checked
+      };
+      saveData();
+    }
+
+    document.getElementById('current-date').textContent = new Date().toLocaleDateString('ar-EG', { year: 'numeric', month: 'long', day: 'numeric' });
+
+    function toggleTheme() { document.body.classList.toggle('dark-mode'); }
+
+    function handleLogin() {
+      const pass = document.getElementById('login-pass-input').value.trim();
+      if (!pass) {
+        alert("يرجى إدخال الكود أو الرمز لفتح المنصة!");
+        return;
+      }
+
+      if (pass === schoolDB.settings.adminPass) {
+        currentUser = { role: 'admin' };
+        document.getElementById('current-user-badge').textContent = '🔑 مدير النظام';
+        document.getElementById('login-screen').style.display = 'none';
+        document.getElementById('main-view').style.display = 'block';
+        document.getElementById('teacher-nav-bar').style.display = 'none';
+        document.getElementById('login-pass-input').value = '';
+        return;
+      }
+
+      const teacher = schoolDB.teachers.find(t => t.loginCode === pass);
+      if (teacher) {
+        currentUser = { role: 'teacher', teacher: teacher };
+        document.getElementById('current-user-badge').textContent = `👨‍🏫 المدرس: ${teacher.name} (${teacher.subject})`;
+        document.getElementById('login-screen').style.display = 'none';
+        document.getElementById('login-pass-input').value = '';
+        document.getElementById('teacher-nav-bar').style.display = 'block';
+        
+        openTeacherDashboard();
+        return;
+      }
+
+      alert("❌ رمز الدخول أو الكود غير صحيح!");
+    }
+
+    function logout() {
+      currentUser = null;
+      document.querySelectorAll('.view-section').forEach(el => el.style.display = 'none');
+      document.getElementById('main-view').style.display = 'none';
+      document.getElementById('teacher-nav-bar').style.display = 'none';
+      document.getElementById('login-screen').style.display = 'flex';
+    }
+
+    function openTeacherDashboard() {
+      document.getElementById('main-view').style.display = 'none';
+      document.querySelectorAll('.view-section').forEach(el => el.style.display = 'none');
+      
+      openView('grades-view');
+      document.getElementById('grades-back-btn').style.display = 'none';
+      document.getElementById('admin-grade-controls').style.display = 'none';
+    }
+
+    function openView(id) {
+      if (currentUser && currentUser.role === 'teacher' && id !== 'grades-view') {
+        alert("عذراً، هذه اللوحة مخصصة لإدارة المدير فقط.");
+        return;
+      }
+
+      document.getElementById('main-view').style.display = 'none';
+      document.querySelectorAll('.view-section').forEach(el => el.style.display = 'none');
+      document.getElementById(id).style.display = 'block';
+
+      if(id === 'teachers-view') renderTeachers();
+      if(id === 'students-view') renderHalls();
+      if(id === 'grades-view') setupGradesView();
+    }
+
+    function closeView(id) {
+      document.getElementById(id).style.display = 'none';
+      if (currentUser && currentUser.role === 'admin') {
+        document.getElementById('main-view').style.display = 'block';
+      }
+    }
+
+    function setupGradesView() {
+      if (currentUser && currentUser.role === 'teacher') {
+        const t = currentUser.teacher;
+        document.getElementById('grades-title-text').textContent = `📊 سجل درجات المادة: ${t.subject} (${t.name})`;
+        document.getElementById('admin-grade-controls').style.display = 'none';
+        
+        const select = document.getElementById('grade-hall-select');
+        select.innerHTML = '';
+        
+        let assignedHalls = new Set(t.assignedHalls || []);
+        Object.keys(schoolDB.hallTeachersMap).forEach(h => {
+          if (schoolDB.hallTeachersMap[h] && schoolDB.hallTeachersMap[h].includes(t.name)) {
+            assignedHalls.add(h);
+          }
+        });
+
+        assignedHalls.forEach(hall => {
+          if (schoolDB.halls[hall]) {
+            select.innerHTML += `<option value="${hall}">${hall}</option>`;
+          }
+        });
+
+        if (select.options.length === 0) {
+          select.innerHTML = '<option value="">-- غير مخصص لقاعات بعد --</option>';
+        }
+      } else {
+        document.getElementById('grades-title-text').textContent = '📊 سجل الدرجات التفاعلي والربط المباشر';
+        document.getElementById('admin-grade-controls').style.display = 'inline-flex';
+        document.getElementById('grades-back-btn').style.display = 'inline-block';
+        updateDropdown('grade-hall-select');
+        updateTeachersDropdown('grade-subject-select');
+      }
+
+      loadGradeTable();
+    }
+
+    function updateDropdown(selectId) {
+      const select = document.getElementById(selectId);
+      select.innerHTML = '<option value="">-- اختر القاعة --</option>';
+      Object.keys(schoolDB.halls).forEach(hall => select.innerHTML += `<option value="${hall}">${hall}</option>`);
+    }
+
+    function updateTeachersDropdown(selectId) {
+      const select = document.getElementById(selectId);
+      select.innerHTML = '<option value="">-- اختر المادة / المدرس --</option>';
+      schoolDB.teachers.forEach(t => select.innerHTML += `<option value="${t.subject}">${t.subject} (${t.name})</option>`);
+    }
+
+    function generateUniqueTeacherCode() {
+      let code = "";
+      let isDuplicate = true;
+      while (isDuplicate) {
+        code = "T-" + Math.floor(1000 + Math.random() * 9000);
+        isDuplicate = schoolDB.teachers.some(t => t.loginCode === code);
+      }
+      return code;
+    }
+
+    function renderTeachers() {
+      const container = document.getElementById('teachers-container');
+      container.innerHTML = '';
+      if (schoolDB.teachers.length === 0) {
+        container.innerHTML = '<p style="text-align:center; color:#888; grid-column: 1/-1;">لا يوجد مدرسون مضافون حالياً. اضغط على "إضافة مدرس جديد".</p>';
+        return;
+      }
+
+      schoolDB.teachers.forEach((t, index) => {
+        let associatedHalls = new Set(t.assignedHalls || []);
+        
+        for (const [hallName, teachersList] of Object.entries(schoolDB.hallTeachersMap)) {
+          if (teachersList && teachersList.includes(t.name)) {
+            associatedHalls.add(hallName);
+          }
+        }
+
+        let hallsMarkup = Array.from(associatedHalls).map(h => `<span class="hall-tag">${h}</span>`).join(' ') || '<span style="color:#aaa; font-size:0.8rem;">غير مرتبط بقاعة بعد</span>';
+
+        container.innerHTML += `
+          <div class="item-card">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+              <h3 style="color:#4318FF;">👨‍🏫 ${t.name}</h3>
+              <span class="code-badge" title="كود دخول المدرس للمنصة">🔑 ${t.loginCode || 'بدون كود'}</span>
+            </div>
+            <ul class="teacher-info-list">
+              <li><span>📘 الاختصاص / المادة:</span> <b>${t.subject}</b></li>
+              <li>
+                <span>⏳ عدد الحصص بالاسبوع:</span> 
+                <input type="number" value="${t.weeklyLessons || 0}" style="width:60px; padding:2px; text-align:center;" onchange="updateTeacherLessons(${index}, this.value)">
+              </li>
+              <li><span>🏛️ القاعات المرتبطة:</span> <div>${hallsMarkup}</div></li>
+            </ul>
+
+            <div style="display:flex; gap:6px; margin-top:12px;">
+              <button class="btn-action btn-blue" style="padding:6px 10px; font-size:0.8rem;" onclick="openEditTeacherModal(${index})">✏️ تعديل</button>
+              <button class="btn-action btn-purple" style="flex:1; justify-content:center; font-size:0.8rem;" onclick="goToTeacherGrades('${t.subject}')">📊 سجل الدرجات</button>
+              <button class="btn-action btn-red" style="padding:6px 10px; font-size:0.8rem;" onclick="deleteTeacher(${index})">🗑️ حذف</button>
+            </div>
+          </div>`;
+      });
+    }
+
+    function openTeacherCodesPrintModal() {
+      const tbody = document.getElementById('teacher-codes-tbody');
+      tbody.innerHTML = '';
+      if(schoolDB.teachers.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="4">لا يوجد مدرسون مضافون حالياً</td></tr>';
+      } else {
+        schoolDB.teachers.forEach((t, i) => {
+          tbody.innerHTML += `
+            <tr>
+              <td>${i+1}</td>
+              <td><b>${t.name}</b></td>
+              <td>${t.subject}</td>
+              <td><b style="color:#4318FF; font-family:monospace;">${t.loginCode || '-'}</b></td>
+            </tr>`;
+        });
+      }
+      document.getElementById('teacher-codes-modal').style.display = 'flex';
+    }
+
+    function closeTeacherCodesModal() {
+      document.getElementById('teacher-codes-modal').style.display = 'none';
+    }
+
+    function openAddTeacherModal() {
+      editingTeacherIndex = null;
+      document.getElementById('modal-title').textContent = '👨‍🏫 إضافة مدرس جديد';
+      document.getElementById('modal-teacher-name').value = '';
+      document.getElementById('modal-teacher-subject').value = '';
+      document.getElementById('modal-teacher-code').value = generateUniqueTeacherCode();
+      document.getElementById('modal-teacher-lessons').value = '10';
+      renderModalHallsCheckboxes([]);
+      document.getElementById('teacher-modal').style.display = 'flex';
+    }
+
+    function openEditTeacherModal(index) {
+      editingTeacherIndex = index;
+      const t = schoolDB.teachers[index];
+      document.getElementById('modal-title').textContent = '✏️ تعديل بيانات المدرس والقاعات';
+      document.getElementById('modal-teacher-name').value = t.name;
+      document.getElementById('modal-teacher-subject').value = t.subject;
+      document.getElementById('modal-teacher-code').value = t.loginCode || generateUniqueTeacherCode();
+      document.getElementById('modal-teacher-lessons').value = t.weeklyLessons || 0;
+      
+      let assigned = new Set(t.assignedHalls || []);
+      for (const [hall, list] of Object.entries(schoolDB.hallTeachersMap)) {
+        if (list && list.includes(t.name)) assigned.add(hall);
+      }
+
+      renderModalHallsCheckboxes(Array.from(assigned));
+      document.getElementById('teacher-modal').style.display = 'flex';
+    }
+
+    function closeTeacherModal() {
+      document.getElementById('teacher-modal').style.display = 'none';
+    }
+
+    function renderModalHallsCheckboxes(selectedHalls) {
+      const container = document.getElementById('modal-halls-list');
+      container.innerHTML = '';
+      const hallKeys = Object.keys(schoolDB.halls);
+
+      if (hallKeys.length === 0) {
+        container.innerHTML = '<span style="color:#999; font-size:0.8rem;">لا توجد قاعات دراسية مضافة حتى الآن.</span>';
+        return;
+      }
+
+      hallKeys.forEach(hall => {
+        const isChecked = selectedHalls.includes(hall) ? 'checked' : '';
+        container.innerHTML += `
+          <label class="checkbox-item">
+            <input type="checkbox" value="${hall}" ${isChecked}>
+            <span>${hall}</span>
+          </label>`;
+      });
+    }
+
+    function saveTeacherData() {
+      const name = document.getElementById('modal-teacher-name').value.trim();
+      const subject = document.getElementById('modal-teacher-subject').value.trim();
+      const code = document.getElementById('modal-teacher-code').value.trim();
+      const lessons = parseInt(document.getElementById('modal-teacher-lessons').value) || 0;
+      
+      const checkedHalls = [];
+      document.querySelectorAll('#modal-halls-list input[type="checkbox"]:checked').forEach(cb => {
+        checkedHalls.push(cb.value);
+      });
+
+      if (!name || !subject || !code) {
+        alert("يرجى إدخال اسم المدرس والتخصص وكود الدخول!");
+        return;
+      }
+
+      const isDuplicateName = schoolDB.teachers.some((t, index) => {
+        return t.name.trim().toLowerCase() === name.toLowerCase() && index !== editingTeacherIndex;
+      });
+
+      if (isDuplicateName) {
+        alert("⚠️ اسم المدرس موجود بالفعل في القائمة!");
+        return;
+      }
+
+      let oldName = "";
+      
+      if (editingTeacherIndex !== null && editingTeacherIndex >= 0 && editingTeacherIndex < schoolDB.teachers.length) {
+        oldName = schoolDB.teachers[editingTeacherIndex].name;
+        
+        schoolDB.teachers[editingTeacherIndex].name = name;
+        schoolDB.teachers[editingTeacherIndex].subject = subject;
+        schoolDB.teachers[editingTeacherIndex].loginCode = code;
+        schoolDB.teachers[editingTeacherIndex].weeklyLessons = lessons;
+        schoolDB.teachers[editingTeacherIndex].assignedHalls = checkedHalls;
+      } else {
+        schoolDB.teachers.push({
+          id: "t_" + Date.now(),
+          name: name,
+          subject: subject,
+          loginCode: code,
+          weeklyLessons: lessons,
+          assignedHalls: checkedHalls
+        });
+      }
+
+      if (oldName && oldName !== name) {
+        Object.keys(schoolDB.hallTeachersMap).forEach(hall => {
+          if (schoolDB.hallTeachersMap[hall]) {
+            schoolDB.hallTeachersMap[hall] = schoolDB.hallTeachersMap[hall].map(t => t === oldName ? name : t);
+          }
+        });
+      }
+
+      Object.keys(schoolDB.halls).forEach(hall => {
+        if (!schoolDB.hallTeachersMap[hall]) schoolDB.hallTeachersMap[hall] = [];
+        
+        if (checkedHalls.includes(hall)) {
+          if (!schoolDB.hallTeachersMap[hall].includes(name)) {
+            schoolDB.hallTeachersMap[hall].push(name);
+          }
+        } else {
+          schoolDB.hallTeachersMap[hall] = schoolDB.hallTeachersMap[hall].filter(t => t !== name && t !== oldName);
+        }
+      });
+
+      saveData();
+      closeTeacherModal();
+      renderTeachers();
+    }
+
+    function openAddStudentModal() {
+      updateDropdown('student-hall-select');
+      document.getElementById('student-fullname').value = '';
+      document.getElementById('student-phone').value = '';
+      document.getElementById('student-modal').style.display = 'flex';
+    }
+
+    function closeStudentModal() {
+      document.getElementById('student-modal').style.display = 'none';
+    }
+
+    function saveStudentData() {
+      const name = document.getElementById('student-fullname').value.trim();
+      const hall = document.getElementById('student-hall-select').value;
+      const phone = document.getElementById('student-phone').value.trim();
+
+      if (!name || !hall) {
+        alert("يرجى كتابة اسم الطالب الثلاثي واختيار القاعة الدراسية!");
+        return;
+      }
+
+      if (!schoolDB.halls[hall]) schoolDB.halls[hall] = [];
+
+      schoolDB.halls[hall].push({
+        name: name,
+        phone: phone,
+        assignedTeacher: "",
+        grades: {}
+      });
+
+      saveData();
+      closeStudentModal();
+      renderHalls();
+      alert(`تم إضافة الطالب (${name}) بنجاح!`);
+    }
+
+    function openHallTeachersModal(hall) {
+      activeHallForTeachers = hall;
+      document.getElementById('hall-teachers-title').textContent = `👨‍🏫 مدرسو قاعة: (${hall})`;
+      
+      const container = document.getElementById('hall-teachers-list');
+      container.innerHTML = '';
+
+      if (schoolDB.teachers.length === 0) {
+        container.innerHTML = '<span style="color:#888; font-size:0.85rem;">لا يوجد مدرسون مضافون في النظام بعد.</span>';
+      } else {
+        const assignedTeachers = schoolDB.hallTeachersMap[hall] || [];
+        schoolDB.teachers.forEach(t => {
+          const isChecked = assignedTeachers.includes(t.name) ? 'checked' : '';
+          container.innerHTML += `
+            <label class="checkbox-item">
+              <input type="checkbox" value="${t.name}" ${isChecked}>
+              <span>${t.name} (<b>${t.subject}</b>)</span>
+            </label>`;
+        });
+      }
+
+      document.getElementById('hall-teachers-modal').style.display = 'flex';
+    }
+
+    function closeHallTeachersModal() {
+      document.getElementById('hall-teachers-modal').style.display = 'none';
+    }
+
+    function saveHallTeachers() {
+      if (!activeHallForTeachers) return;
+
+      const checkedTeachers = [];
+      const selectedSubjects = new Set();
+      let hasDuplicateSubject = false;
+      let duplicateSubjectName = "";
+
+      document.querySelectorAll('#hall-teachers-list input[type="checkbox"]:checked').forEach(cb => {
+        const teacherName = cb.value;
+        const teacherObj = schoolDB.teachers.find(t => t.name === teacherName);
+
+        if (teacherObj) {
+          if (selectedSubjects.has(teacherObj.subject)) {
+            hasDuplicateSubject = true;
+            duplicateSubjectName = teacherObj.subject;
+          } else {
+            selectedSubjects.add(teacherObj.subject);
+            checkedTeachers.push(teacherName);
+          }
+        }
+      });
+
+      if (hasDuplicateSubject) {
+        alert(`⚠️ لا يمكن تخصيص أكثر من مدرس لنفس المادة (${duplicateSubjectName}) داخل القاعة الواحدة!`);
+        return;
+      }
+
+      schoolDB.hallTeachersMap[activeHallForTeachers] = checkedTeachers;
+
+      schoolDB.teachers.forEach(tObj => {
+        if (!tObj.assignedHalls) tObj.assignedHalls = [];
+        if (checkedTeachers.includes(tObj.name)) {
+          if (!tObj.assignedHalls.includes(activeHallForTeachers)) {
+            tObj.assignedHalls.push(activeHallForTeachers);
+          }
+        } else {
+          tObj.assignedHalls = tObj.assignedHalls.filter(h => h !== activeHallForTeachers);
+        }
+      });
+
+      saveData();
+      closeHallTeachersModal();
+      renderHalls();
+    }
+
+    function updateTeacherLessons(index, val) {
+      schoolDB.teachers[index].weeklyLessons = parseInt(val) || 0;
+      saveData();
+    }
+
+    function goToTeacherGrades(subject) {
+      openView('grades-view');
+      document.getElementById('grade-view-type').value = 'subject';
+      document.getElementById('grade-subject-select').value = subject;
+      loadGradeTable();
+    }
+
+    function deleteTeacher(index) {
+      if(confirm("هل أنت تأكد من حذف المدرس من الكادر؟")) {
+        const tName = schoolDB.teachers[index].name;
+        Object.keys(schoolDB.hallTeachersMap).forEach(h => {
+          schoolDB.hallTeachersMap[h] = schoolDB.hallTeachersMap[h].filter(item => item !== tName);
+        });
+        schoolDB.teachers.splice(index, 1);
+        saveData();
+        renderTeachers();
+      }
+    }
+
+    function renderHalls() {
+      const container = document.getElementById('halls-container');
+      container.innerHTML = '';
+      const hallKeys = Object.keys(schoolDB.halls);
+
+      if (hallKeys.length === 0) {
+        container.innerHTML = '<p style="text-align:center; color:#888; grid-column: 1/-1;">لا توجد قاعات دراسية مضافة.</p>';
+        return;
+      }
+
+      for (const [hall, students] of Object.entries(schoolDB.halls)) {
+        let assignedTeachersList = schoolDB.hallTeachersMap[hall] || [];
+        let teachersTags = assignedTeachersList.length > 0 
+          ? assignedTeachersList.map(t => `<span class="hall-tag">${t}</span>`).join(' ') 
+          : '<span style="color:#aaa; font-size:0.75rem;">لم يحدد مدرسون بعد</span>';
+
+        let studentsList = students.map((s, idx) => {
+          let teacherOptions = `<option value="">-- بدون مشرف خاص --</option>`;
+          schoolDB.teachers.forEach(t => {
+            const isSelected = (s.assignedTeacher === t.name) ? 'selected' : '';
+            teacherOptions += `<option value="${t.name}" ${isSelected}>${t.name} (${t.subject})</option>`;
+          });
+
+          return `
+          <div class="student-item">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+              <div>
+                <b style="font-size:0.88rem;">👤 ${s.name}</b>
+              </div>
+              <div>
+                <button onclick="openStudentReportCard('${hall}', ${idx})" title="بطاقة الطالب" style="border:none; background:none; cursor:pointer; font-size:0.9rem;">🎓</button>
+                <button onclick="removeStudent('${hall}', ${idx})" style="color:red; border:none; background:none; cursor:pointer;">❌</button>
+              </div>
+            </div>
+            ${s.phone ? `<div style="font-size:0.75rem; color:#666; margin-top:2px;">📞 ${s.phone}</div>` : ''}
+            <div style="margin-top:5px;">
+              <select style="font-size:0.75rem; padding:4px; margin-bottom:0;" onchange="assignTeacherToStudent('${hall}', ${idx}, this.value)">
+                ${teacherOptions}
+              </select>
+            </div>
+          </div>`;
+        }).join('');
+
+        container.innerHTML += `
+          <div class="item-card">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+              <h4>🏛️ ${hall}</h4>
+              <button class="btn-action btn-red" style="padding:2px 6px; font-size:0.7rem;" onclick="deleteHall('${hall}')">حذف القاعة</button>
+            </div>
+
+            <div style="margin-bottom:8px;">
+              <div style="font-size:0.8rem; font-weight:bold; margin-bottom:3px;">👨‍🏫 كادر مدرسين القاعة:</div>
+              <div>${teachersTags}</div>
+              <button class="btn-action btn-purple" style="padding:3px 8px; font-size:0.75rem; margin-top:5px;" onclick="openHallTeachersModal('${hall}')">✏️ تعيين مدرسين للقاعة</button>
+            </div>
+
+            <p style="font-size:0.8rem; color:#666; margin-bottom:8px;">إجمالي الطلاب: <b>${students.length}</b></p>
+            <div style="max-height:180px; overflow-y:auto; padding-left:4px;">${studentsList || '<p style="color:#aaa; font-size:0.8rem;">لا يوجد طلاب مضافون في هذه القاعة</p>'}</div>
+          </div>`;
+      }
+    }
+
+    function addCustomHall() {
+      const hallName = prompt("أدخل اسم القاعة الدراسية الجديدة (مثال: القاعة 1):");
+      if (hallName && hallName.trim()) {
+        const name = hallName.trim();
+        if (schoolDB.halls[name]) {
+          alert("القاعة موجودة بالفعل!");
+          return;
+        }
+        schoolDB.halls[name] = [];
+        schoolDB.hallTeachersMap[name] = [];
+        saveData();
+        renderHalls();
+      }
+    }
+
+    function deleteHall(hall) {
+      if (confirm(`هل أنت متأكد من حذف (${hall}) وكافة بيانات الطلاب فيها؟`)) {
+        delete schoolDB.halls[hall];
+        delete schoolDB.hallTeachersMap[hall];
+        saveData();
+        renderHalls();
+      }
+    }
+
+    function removeStudent(hall, idx) {
+      if(confirm("حذف الطالب من القاعة؟")) {
+        schoolDB.halls[hall].splice(idx, 1);
+        saveData();
+        renderHalls();
+      }
+    }
+
+    function assignTeacherToStudent(hall, studentIdx, teacherName) {
+      schoolDB.halls[hall][studentIdx].assignedTeacher = teacherName;
+      saveData();
+    }
+
+    function parseGradeVal(val) {
+      if (val === null || val === undefined || val === "") return { type: 'empty', val: null };
+      let str = val.toString().trim().toLowerCase();
+      if (str === 'غ' || str === 'g') return { type: 'absent', val: 0 };
+      if (str === 'م' || str === 'm') return { type: 'excused', val: 0 };
+
+      let num = parseFloat(str);
+      if (isNaN(num)) return { type: 'empty', val: null };
+      if (num < 0) num = 0;
+      if (num > 100) num = 100;
+      return { type: 'num', val: num };
+    }
+
+    function calculateStudentAverage(g) {
+      if (!g) return 0;
+      let p1 = parseGradeVal(g.term1_avg);
+      let pMid = parseGradeVal(g.mid);
+      let p2 = parseGradeVal(g.term2_avg);
+
+      let sum = 0, count = 0;
+      [p1, pMid, p2].forEach(p => {
+        if (p.type === 'num' || p.type === 'absent') {
+          sum += p.val;
+          count++;
+        }
+      });
+
+      return count > 0 ? Math.round(sum / count) : 0;
+    }
+
+    function loadGradeTable() {
+      const hall = document.getElementById('grade-hall-select').value;
+      const viewType = document.getElementById('grade-view-type') ? document.getElementById('grade-view-type').value : 'subject';
+      const thead = document.getElementById('grades-table-head');
+      const tbody = document.getElementById('grades-table-body');
+      
+      thead.innerHTML = '';
+      tbody.innerHTML = '';
+
+      if (!hall || !schoolDB.halls[hall]) {
+        tbody.innerHTML = '<tr><td colspan="15">اختر القاعة الدراسية لعرض السجل</td></tr>';
+        document.getElementById('hall-stats-bar').style.display = 'none';
+        return;
+      }
+
+      const students = schoolDB.halls[hall];
+
+      if (currentUser && currentUser.role === 'teacher') {
+        renderSubjectGradesTable(students, currentUser.teacher.subject, hall);
+      } else {
+        if (viewType === 'subject') {
+          const subject = document.getElementById('grade-subject-select').value;
+          document.getElementById('subject-select-label').style.display = 'inline-block';
+          document.getElementById('grade-subject-select').style.display = 'inline-block';
+          renderSubjectGradesTable(students, subject, hall);
+        } else {
+          document.getElementById('subject-select-label').style.display = 'none';
+          document.getElementById('grade-subject-select').style.display = 'none';
+          renderAllSubjectsTable(students, hall);
+        }
+      }
+      filterGradesTable();
+    }
+
+    function renderSubjectGradesTable(students, subject, hall) {
+      const thead = document.getElementById('grades-table-head');
+      const tbody = document.getElementById('grades-table-body');
+      const isTeacher = currentUser && currentUser.role === 'teacher';
+      const locks = schoolDB.settings.locks || { term1: false, midterm: false, term2: false };
+
+      if (!subject) {
+        tbody.innerHTML = '<tr><td colspan="15">يرجى تحديد المادة الدراسية للعرض</td></tr>';
+        document.getElementById('hall-stats-bar').style.display = 'none';
+        return;
+      }
+
+      const term1Disabled = isTeacher && locks.term1 ? 'disabled' : '';
+      const midDisabled = isTeacher && locks.midterm ? 'disabled' : '';
+      const term2Disabled = isTeacher && locks.term2 ? 'disabled' : '';
+
+      let thHTML = `
+        <tr>
+          <th>#</th>
+          <th>اسم الطالب الثلاثي</th>
+          <th>معدل الفصل الأول (100) ${locks.term1 ? '🔒' : ''}</th>
+          <th>نصف السنة (100) ${locks.midterm ? '🔒' : ''}</th>
+          <th>معدل الفصل الثاني (100) ${locks.term2 ? '🔒' : ''}</th>`;
+      
+      if (!isTeacher) {
+        thHTML += `<th>المعدل السنوي</th>`;
+      }
+      thHTML += `</tr>`;
+      thead.innerHTML = thHTML;
+
+      let passCount = 0;
+      let totalStudents = students.length;
+
+      students.forEach((s, idx) => {
+        if (!s.grades) s.grades = {};
+        if (!s.grades[subject]) {
+          s.grades[subject] = { term1_avg: "", mid: "", term2_avg: "" };
+        }
+        let g = s.grades[subject];
+        let annualAvg = calculateStudentAverage(g);
+
+        if (annualAvg >= 50) passCount++;
+
+        let badgeClass = annualAvg >= 50 ? 'badge-pass' : 'badge-fail';
+
+        let trHTML = `
+          <tr>
+            <td>${idx + 1}</td>
+            <td><b>${s.name}</b></td>
+            <td><input type="text" class="grade-input" ${term1Disabled} value="${g.term1_avg||''}" placeholder="" oninput="updateGrade('${hall}', ${idx}, '${subject}', 'term1_avg', this.value)"></td>
+            <td><input type="text" class="grade-input midterm-input" ${midDisabled} value="${g.mid||''}" placeholder="" oninput="updateGrade('${hall}', ${idx}, '${subject}', 'mid', this.value)"></td>
+            <td><input type="text" class="grade-input" ${term2Disabled} value="${g.term2_avg||''}" placeholder="" oninput="updateGrade('${hall}', ${idx}, '${subject}', 'term2_avg', this.value)"></td>`;
+
+        if (!isTeacher) {
+          trHTML += `<td><span class="annual-badge ${badgeClass}" id="avg_badge_${idx}">${annualAvg}</span></td>`;
+        }
+        trHTML += `</tr>`;
+
+        tbody.innerHTML += trHTML;
+      });
+
+      if (isTeacher) {
+        document.getElementById('hall-stats-bar').style.display = 'none';
+      } else {
+        document.getElementById('hall-stats-bar').style.display = 'flex';
+        document.getElementById('stat-total-students').textContent = totalStudents;
+        document.getElementById('stat-fail-count').textContent = totalStudents - passCount;
+        document.getElementById('stat-pass-rate').textContent = totalStudents > 0 ? Math.round((passCount / totalStudents) * 100) + '%' : '0%';
+      }
+    }
+
+    function renderAllSubjectsTable(students, hall) {
+      const thead = document.getElementById('grades-table-head');
+      const tbody = document.getElementById('grades-table-body');
+
+      const subjects = schoolDB.teachers.map(t => t.subject);
+
+      if (subjects.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="15">لا يوجد مدرسون ومواد دراسية معرفة بالنظام</td></tr>';
+        document.getElementById('hall-stats-bar').style.display = 'none';
+        return;
+      }
+
+      let headHTML = `<tr><th>#</th><th>اسم الطالب</th>`;
+      subjects.forEach(sub => headHTML += `<th>${sub}</th>`);
+      headHTML += `<th>المعدل العام</th><th>النتيجة</th></tr>`;
+      thead.innerHTML = headHTML;
+
+      let passCount = 0;
+
+      students.forEach((s, idx) => {
+        let rowHTML = `<tr><td>${idx + 1}</td><td><b>${s.name}</b></td>`;
+        let totalAvgSum = 0;
+        let validSubjectsCount = 0;
+
+        subjects.forEach(sub => {
+          let g = s.grades && s.grades[sub] ? s.grades[sub] : {};
+          let annualAvg = calculateStudentAverage(g);
+
+          if (g && (g.term1_avg !== "" || g.mid !== "" || g.term2_avg !== "")) {
+            totalAvgSum += annualAvg;
+            validSubjectsCount++;
+          }
+
+          rowHTML += `<td style="font-weight:bold;">${annualAvg || '-'}</td>`;
+        });
+
+        let overallAvg = validSubjectsCount > 0 ? Math.round(totalAvgSum / validSubjectsCount) : 0;
+        let isPass = overallAvg >= 50;
+        if (isPass) passCount++;
+
+        let badgeClass = isPass ? 'badge-pass' : 'badge-fail';
+
+        rowHTML += `<td style="font-weight:800; color:#4318FF;">${overallAvg}</td>`;
+        rowHTML += `<td><span class="annual-badge ${badgeClass}">${isPass ? 'ناجح' : 'راسب'}</span></td></tr>`;
+
+        tbody.innerHTML += rowHTML;
+      });
+
+      document.getElementById('hall-stats-bar').style.display = 'flex';
+      document.getElementById('stat-total-students').textContent = students.length;
+      document.getElementById('stat-fail-count').textContent = students.length - passCount;
+      document.getElementById('stat-pass-rate').textContent = students.length > 0 ? Math.round((passCount / students.length) * 100) + '%' : '0%';
+    }
+
+    function updateGrade(hall, studentIdx, subject, field, val) {
+      if (!schoolDB.halls[hall] || !schoolDB.halls[hall][studentIdx]) return;
+
+      if (!schoolDB.halls[hall][studentIdx].grades) {
+        schoolDB.halls[hall][studentIdx].grades = {};
+      }
+      if (!schoolDB.halls[hall][studentIdx].grades[subject]) {
+        schoolDB.halls[hall][studentIdx].grades[subject] = { term1_avg: "", mid: "", term2_avg: "" };
+      }
+
+      let parsed = parseGradeVal(val);
+      let finalVal = "";
+
+      if (parsed.type === 'num') {
+        finalVal = parsed.val;
+      } else if (parsed.type === 'absent') {
+        finalVal = 'غ';
+      } else if (parsed.type === 'excused') {
+        finalVal = 'م';
+      } else {
+        finalVal = "";
+      }
+
+      schoolDB.halls[hall][studentIdx].grades[subject][field] = finalVal;
+
+      const updatedAvg = calculateStudentAverage(schoolDB.halls[hall][studentIdx].grades[subject]);
+      const badgeEl = document.getElementById(`avg_badge_${studentIdx}`);
+      if (badgeEl) {
+        badgeEl.textContent = updatedAvg;
+        badgeEl.className = `annual-badge ${updatedAvg >= 50 ? 'badge-pass' : 'badge-fail'}`;
+      }
+    }
+
+    function saveCurrentGradesToDB() {
+      saveData();
+      alert("✅ تم حفظ جميع الدرجات بنجاح في النظام!");
+      loadGradeTable();
+    }
+
+    function filterGradesTable() {
+      const q = document.getElementById('grade-search-input').value.toLowerCase();
+      const rows = document.querySelectorAll('#grades-table-body tr');
+      rows.forEach(row => {
+        const nameText = row.cells[1] ? row.cells[1].textContent.toLowerCase() : '';
+        row.style.display = nameText.includes(q) ? '' : 'none';
+      });
+    }
+
+    function openStudentReportCard(hall, studentIdx) {
+      const student = schoolDB.halls[hall][studentIdx];
+      const modalContent = document.getElementById('student-card-content');
+      document.getElementById('report-card-school-title').textContent = "🎓 " + (schoolDB.settings.schoolName || "بطاقة الطالب");
+
+      let html = `
+        <div style="margin-bottom:15px; background:rgba(67, 24, 255, 0.04); padding:12px; border-radius:12px; font-size:0.9rem;">
+          <div><b>👤 اسم الطالب الثلاثي:</b> ${student.name}</div>
+          <div><b>🏛️ القاعة الدراسية:</b> ${hall}</div>
+          <div><b>👨‍🏫 المدرس المشرف:</b> ${student.assignedTeacher || 'غير محدد'}</div>
+        </div>
+
+        <table style="width:100%; border-collapse:collapse;">
+          <thead>
+            <tr>
+              <th>المادة الدراسية</th>
+              <th>السعي</th>
+              <th>النتيجة</th>
+            </tr>
+          </thead>
+          <tbody>`;
+
+      let subjects = schoolDB.teachers.map(t => t.subject);
+      let totalAvgSum = 0;
+      let count = 0;
+
+      subjects.forEach(sub => {
+        let g = student.grades && student.grades[sub] ? student.grades[sub] : {};
+        let avg = calculateStudentAverage(g);
+
+        if (g && (g.term1_avg !== "" || g.mid !== "" || g.term2_avg !== "")) {
+          totalAvgSum += avg;
+          count++;
+        }
+
+        let isPass = avg >= 50;
+        html += `
+          <tr>
+            <td><b>${sub}</b></td>
+            <td><b>${avg || '-'}</b></td>
+            <td><span class="annual-badge ${isPass ? 'badge-pass' : 'badge-fail'}">${isPass ? 'ناجح' : 'راسب'}</span></td>
+          </tr>`;
+      });
+
+      let finalAvg = count > 0 ? Math.round(totalAvgSum / count) : 0;
+
+      html += `
+          </tbody>
+        </table>
+        <div style="margin-top:15px; text-align:center; font-size:1.1rem; font-weight:bold; color:#4318FF;">
+          المعدل العام للطالب: ${finalAvg}٪
+        </div>`;
+
+      modalContent.innerHTML = html;
+      document.getElementById('student-report-card-modal').style.display = 'flex';
+    }
+
+    function closeReportCardModal() {
+      document.getElementById('student-report-card-modal').style.display = 'none';
+    }
+
+    function exportGradesExcel() {
+      const table = document.getElementById('grades-table-element');
+      const hall = document.getElementById('grade-hall-select').value || 'القاعة';
+      let fileName = `سجل_الدرجات_${hall}`;
+
+      if (currentUser && currentUser.role === 'teacher') {
+        const t = currentUser.teacher;
+        fileName = `سجل_درجات_${t.name}_مادة_${t.subject}_${hall}`;
+      } else {
+        const viewType = document.getElementById('grade-view-type').value;
+        if (viewType === 'subject') {
+          const subject = document.getElementById('grade-subject-select').value;
+          const teacherObj = schoolDB.teachers.find(t => t.subject === subject);
+          const teacherName = teacherObj ? teacherObj.name : 'المدرس';
+          fileName = `سجل_درجات_${teacherName}_مادة_${subject}_${hall}`;
+        } else {
+          fileName = `سجل_درجات_القاعة_الشامل_${hall}`;
+        }
+      }
+
+      fileName = fileName.replace(/\s+/g, '_');
+      const wb = XLSX.utils.table_to_book(table, { sheet: "سجل الدرجات" });
+      XLSX.writeFile(wb, `${fileName}.xlsx`);
+    }
+
+    function exportGradesPDF() {
+      const hall = document.getElementById('grade-hall-select').value;
+      let subject = "";
+
+      if (currentUser && currentUser.role === 'teacher') {
+        subject = currentUser.teacher.subject;
+      } else {
+        subject = document.getElementById('grade-subject-select').value;
+      }
+      
+      document.getElementById('pdf-school-name').textContent = schoolDB.settings.schoolName || "المدرسة الإلكترونية";
+      document.getElementById('pdf-subject-title').textContent = `سجل درجات قاعة (${hall}) - مادة (${subject || 'الكل'})`;
+      
+      document.getElementById('pdf-header').style.display = 'block';
+      window.print();
+      document.getElementById('pdf-header').style.display = 'none';
+    }
+
+    function saveSettings() {
+      const name = document.getElementById('set-school-name').value.trim();
+      const pass = document.getElementById('set-admin-pass').value.trim();
+
+      if (name) schoolDB.settings.schoolName = name;
+      if (pass) schoolDB.settings.adminPass = pass;
+
+      saveLockSettings();
+      alert("تم حفظ الإعدادات العامة وحالة القفل بنجاح!");
+    }
+
+    function exportBackupJSON() {
+      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(schoolDB));
+      const downloadAnchor = document.createElement('a');
+      downloadAnchor.setAttribute("href", dataStr);
+      downloadAnchor.setAttribute("download", `نسخة_احتياطية_المدرسة_${new Date().toISOString().slice(0,10)}.json`);
+      document.body.appendChild(downloadAnchor);
+      downloadAnchor.click();
+      downloadAnchor.remove();
+    }
+
+    function importBackupJSON(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        try {
+          const importedDB = JSON.parse(e.target.result);
+          if (importedDB && importedDB.halls) {
+            schoolDB = importedDB;
+            saveData();
+            alert("تم استرجاع النسخة الاحتياطية بنجاح!");
+            location.reload();
+          } else {
+            alert("الملف غير صالح أو لا يحتوي على بنية البيانات الصحيحة!");
+          }
+        } catch (err) {
+          alert("حدث خطأ أثناء قراءة ملف النسخة الاحتياطية!");
+        }
+      };
+      reader.readAsText(file);
+    }
+
+    function resetDatabase() {
+      if (confirm("⚠️ تحذير شديد: هل أنت متأكد من مسح وتفريغ كافة البيانات والعودة للضبط الأساسي؟")) {
+        localStorage.removeItem('school_master_db');
+        location.reload();
+      }
+    }
+
+    window.onload = function() {
+      updateDashboardStats();
+    };
+  </script>
+</body>
+</html>
